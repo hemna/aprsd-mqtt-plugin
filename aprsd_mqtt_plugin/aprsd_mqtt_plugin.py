@@ -40,8 +40,8 @@ class MQTTPlugin(plugin.APRSDPluginBase):
 
         self.client = mqtt.Client(
             client_id="aprsd_mqtt_plugin",
-            #transport='websockets',
-            #protocol=mqtt.MQTTv5
+            # transport='websockets',
+            # protocol=mqtt.MQTTv5
         )
         # self.client.on_publish = self.on_publish
         self.client.on_connect = self.on_connect
@@ -60,9 +60,9 @@ class MQTTPlugin(plugin.APRSDPluginBase):
         self.client.connect(
             CONF.aprsd_mqtt_plugin.host_ip,
             port=CONF.aprsd_mqtt_plugin.host_port,
-            #clean_start=mqtt.MQTT_CLEAN_START_FIRST_ONLY,
+            # clean_start=mqtt.MQTT_CLEAN_START_FIRST_ONLY,
             keepalive=60,
-            #properties=properties
+            # properties=properties
         )
 
     def on_publish(self, client, userdata, mid):
@@ -111,8 +111,8 @@ class MQTTPlugin(plugin.APRSDPluginBase):
             CONF.aprsd_mqtt_plugin.topic,
             payload=packet.json,
             qos=0,
-            #qos=2,
-            #properties=self.mqtt_properties
+            # qos=2,
+            # properties=self.mqtt_properties
         )
 
         # Now we can process
