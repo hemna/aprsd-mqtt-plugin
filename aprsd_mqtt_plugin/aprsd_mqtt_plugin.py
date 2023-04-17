@@ -1,19 +1,24 @@
 import logging
 
+import paho.mqtt.client as mqtt
+import pluggy
 from aprsd import packets, plugin
-from aprsd.utils import trace
 from oslo_config import cfg
+from paho.mqtt.packettypes import PacketTypes
+from paho.mqtt.properties import Properties
 
 from aprsd_mqtt_plugin import conf  # noqa
 
 
 CONF = cfg.CONF
 LOG = logging.getLogger("APRSD")
+hookimpl = pluggy.HookimplMarker("aprsd")
 
 
 class MQTTPlugin(plugin.APRSDPluginBase):
 
     enabled = False
+    client = None
 
     def setup(self):
         """Allows the plugin to do some 'setup' type checks in here.
@@ -23,30 +28,92 @@ class MQTTPlugin(plugin.APRSDPluginBase):
         received."""
         # Do some checks here?
         self.enabled = True
+        if not CONF.aprsd_mqtt_plugin.enabled:
+            LOG.info("Plugin not enabled in config.")
+            self.enabled = False
+            return
 
-    def create_threads(self):
-        """This allows you to create and return a custom APRSDThread object.
+        if not CONF.aprsd_mqtt_plugin.host_ip:
+            LOG.error("aprsd_mqtt_plugin MQTT host_ip not set. Disabling plugin")
+            self.enabled = False
+            return
 
-        Create a child of the aprsd.threads.APRSDThread object and return it
-        It will automatically get started.
+        self.client = mqtt.Client(
+            client_id="aprsd_mqtt_plugin",
+            #transport='websockets',
+            #protocol=mqtt.MQTTv5
+        )
+        # self.client.on_publish = self.on_publish
+        self.client.on_connect = self.on_connect
+        self.client.on_disconnect = self.on_disconnect
 
-        You can see an example of one here:
-        https://github.com/craigerl/aprsd/blob/master/aprsd/threads.py#L141
-        """
+        if CONF.aprsd_mqtt_plugin.user:
+            self.client.username_pw_set(
+                CONF.aprsd_mqtt_plugin.user,
+                CONF.aprsd_mqtt_plugin.password,
+            )
+
+        self.mqtt_properties = Properties(PacketTypes.PUBLISH)
+        self.mqtt_properties.MessageExpiryInterval = 30  # in seconds
+        properties = Properties(PacketTypes.CONNECT)
+        properties.SessionExpiryInterval = 30 * 60  # in seconds
+        self.client.connect(
+            CONF.aprsd_mqtt_plugin.host_ip,
+            port=CONF.aprsd_mqtt_plugin.host_port,
+            #clean_start=mqtt.MQTT_CLEAN_START_FIRST_ONLY,
+            keepalive=60,
+            #properties=properties
+        )
+
+    def on_publish(self, client, userdata, mid):
+        LOG.info(f"Published {mid}:{userdata}")
+
+    def on_connect(self, client, userdata, flags, rc):
+        LOG.info(
+            f"Connected to mqtt://{CONF.aprsd_mqtt_plugin.host_ip}:"
+            f"{CONF.aprsd_mqtt_plugin.host_port}/"
+            f"{CONF.aprsd_mqtt_plugin.topic} ({rc})",
+        )
+        client.subscribe(CONF.mqtt.topic)
+
+    def on_disconnect(self, client, userdata, rc):
+        LOG.warning("client disconnected ok")
+
+    @hookimpl
+    def filter(self, packet: packets.core.Packet):
+        result = packets.NULL_MESSAGE
         if self.enabled:
-            # You can create a background APRSDThread object here
-            # Just return it for example:
-            # https://github.com/hemna/aprsd-weewx-plugin/blob/master/aprsd_weewx_plugin/aprsd_weewx_plugin.py#L42-L50
-            #
-            return []
+            # packet is from a callsign in the watch list
+            self.rx_inc()
+            try:
+                result = self.process(packet)
+            except Exception as ex:
+                LOG.error(
+                    "Plugin {} failed to process packet {}".format(
+                        self.__class__, ex,
+                    ),
+                )
+            if result:
+                self.tx_inc()
+        else:
+            LOG.warning(f"{self.__class__} plugin is not enabled")
 
-    @trace.trace
+        return result
+
     def process(self, packet: packets.core.Packet):
-
-        LOG.info("MQTTPlugin Plugin")
-
-        packet.from_call
-        packet.message_text
+        if self.tx_count % 50 == 0:
+            LOG.debug(
+                f"MQTTPlugin Publishing packet ({self.tx_count}) to mqtt://"
+                f"{CONF.aprsd_mqtt_plugin.host_ip}:{CONF.aprsd_mqtt_plugin.host_port}"
+                f"/{CONF.aprsd_mqtt_plugin.topic}",
+            )
+        self.client.publish(
+            CONF.aprsd_mqtt_plugin.topic,
+            payload=packet.json,
+            qos=0,
+            #qos=2,
+            #properties=self.mqtt_properties
+        )
 
         # Now we can process
-        return "some reply message"
+        return packets.NULL_MESSAGE
