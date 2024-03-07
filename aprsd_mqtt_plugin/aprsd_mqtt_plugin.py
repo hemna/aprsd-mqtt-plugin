@@ -109,13 +109,13 @@ class MQTTPlugin(plugin.APRSDPluginBase):
                 f"/{CONF.aprsd_mqtt_plugin.topic}",
             )
             LOG.info(f"Packet {packet.json}")
-            self.client.publish(
-                CONF.aprsd_mqtt_plugin.topic,
-                payload=packet.to_json(),
-                qos=0,
-                # qos=2,
-                # properties=self.mqtt_properties
-            )
+        self.client.publish(
+            CONF.aprsd_mqtt_plugin.topic,
+            payload=packet.to_json(),
+            qos=0,
+            # qos=2,
+            # properties=self.mqtt_properties
+        )
 
         # Now we can process
         return packets.NULL_MESSAGE
