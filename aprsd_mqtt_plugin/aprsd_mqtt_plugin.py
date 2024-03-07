@@ -39,6 +39,7 @@ class MQTTPlugin(plugin.APRSDPluginBase):
             return
 
         self.client = mqtt.Client(
+            callback_api_version=mqtt.CallbackAPIVersion.VERSION2,
             client_id="aprsd_mqtt_plugin",
             # transport='websockets',
             # protocol=mqtt.MQTTv5
@@ -107,13 +108,14 @@ class MQTTPlugin(plugin.APRSDPluginBase):
                 f"{CONF.aprsd_mqtt_plugin.host_ip}:{CONF.aprsd_mqtt_plugin.host_port}"
                 f"/{CONF.aprsd_mqtt_plugin.topic}",
             )
-        self.client.publish(
-            CONF.aprsd_mqtt_plugin.topic,
-            payload=packet.json,
-            qos=0,
-            # qos=2,
-            # properties=self.mqtt_properties
-        )
+            LOG.info(f"Packet {packet.json}")
+            self.client.publish(
+                CONF.aprsd_mqtt_plugin.topic,
+                payload=packet.to_json(),
+                qos=0,
+                # qos=2,
+                # properties=self.mqtt_properties
+            )
 
         # Now we can process
         return packets.NULL_MESSAGE
