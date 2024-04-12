@@ -108,7 +108,6 @@ class MQTTPlugin(plugin.APRSDPluginBase):
                 f"{CONF.aprsd_mqtt_plugin.host_ip}:{CONF.aprsd_mqtt_plugin.host_port}"
                 f"/{CONF.aprsd_mqtt_plugin.topic}",
             )
-            LOG.info(f"Packet {packet.human_info()}")
         self.client.publish(
             CONF.aprsd_mqtt_plugin.topic,
             payload=packet.to_json(),
