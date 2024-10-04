@@ -58,6 +58,7 @@ class MQTTPlugin(plugin.APRSDPluginBase):
         self.mqtt_properties.MessageExpiryInterval = 30  # in seconds
         properties = Properties(PacketTypes.CONNECT)
         properties.SessionExpiryInterval = 30 * 60  # in seconds
+        LOG.info(f"Connecting to mqtt://{CONF.aprsd_mqtt_plugin.host_ip}:{CONF.aprsd_mqtt_plugin.host_port}")
         self.client.connect(
             CONF.aprsd_mqtt_plugin.host_ip,
             port=CONF.aprsd_mqtt_plugin.host_port,
