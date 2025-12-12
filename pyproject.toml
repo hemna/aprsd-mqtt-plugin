@@ -1,0 +1,138 @@
+[project]
+
+# This is the name of your project. The first time you publish this
+# package, this name will be registered for you. It will determine how
+# users can install this project, e.g.:
+#
+# $ pip install aprsd-mqtt-plugin
+#
+# And where it will live on PyPI: https://pypi.org/project/aprsd-mqtt-plugin/
+name = "aprsd-mqtt-plugin"
+description = "APRSD MQTT Plugin sends APRS packets to mqtt queue"
+
+# Specify which Python versions you support. In contrast to the
+# 'Programming Language' classifiers in this file, 'pip install' will check this
+# and refuse to install the project if the version does not match. See
+# https://packaging.python.org/guides/distributing-packages-using-setuptools/#python-requires
+requires-python = ">=3.7"
+
+dynamic = ["version"]
+
+# Dependencies from requirements.txt
+dependencies = [
+    "aprsd>=3.0.0",
+    "oslo_config",
+    "paho-mqtt>=2.0.0",
+]
+
+# This is an optional longer description of your project that represents
+# the body of text which users will see when you visit PyPI.
+#
+# Often, this is the same as your README, so you can just read it in from
+# that file directly.
+#
+# This field corresponds to the "Description" metadata field:
+# https://packaging.python.org/en/latest/specifications/core-metadata/#description-optional
+readme = {file = "README.rst", content-type = "text/x-rst"}
+
+# This is either text indicating the license for the distribution, or a file
+# that contains the license.
+# https://packaging.python.org/en/latest/specifications/core-metadata/#license
+license = {file = "LICENSE"}
+
+# This should be your name or the name of the organization who originally
+# authored the project, and a valid email address corresponding to the name
+# listed.
+authors = [
+    {name = "Walter A. Boring IV", email = "waboring@hemna.com"},
+]
+
+# This should be your name or the names of the organization who currently
+# maintains the project, and a valid email address corresponding to the name
+# listed.
+maintainers = [
+    {name = "Walter A. Boring IV", email = "waboring@hemna.com"},
+]
+
+# This field adds keywords for your project which will appear on the
+# project page. What does your project relate to?
+#
+# Note that this is a list of additional keywords, separated
+# by commas, to be used to assist searching for the distribution in a
+# larger catalog.
+keywords = [
+    "aprs",
+    "aprs-is",
+    "aprsd",
+    "aprsd-plugin",
+    "mqtt",
+    "ham-radio",
+]
+
+# Classifiers help users find your project by categorizing it.
+#
+# For a list of valid classifiers, see https://pypi.org/classifiers/
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: Apache Software License",
+    "Topic :: Communications :: Ham Radio",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+]
+
+# List URLs that are relevant to your project
+#
+# This field corresponds to the "Project-URL" and "Home-Page" metadata fields:
+# https://packaging.python.org/en/latest/specifications/core-metadata/#project-url-multiple-use
+# https://packaging.python.org/en/latest/specifications/core-metadata/#home-page-optional
+#
+# Examples listed include a pattern for specifying where the package tracks
+# issues, where the source is hosted, where to say thanks to the package
+# maintainers, and where to support the project financially. The key is
+# what's used to render the link text on PyPI.
+[project.urls]
+"Homepage" = "https://github.com/hemna/aprsd-mqtt-plugin"
+"Bug Reports" = "https://github.com/hemna/aprsd-mqtt-plugin/issues"
+"Source" = "https://github.com/hemna/aprsd-mqtt-plugin"
+Documentation = "https://aprsd-mqtt-plugin.readthedocs.io/en/latest/"
+
+# Entry points for oslo.config.opts (from setup.cfg)
+[project.entry-points."oslo.config.opts"]
+"aprsd_mqtt_plugin.conf" = "aprsd_mqtt_plugin.conf.opts:list_opts"
+
+# If you are using a different build backend, you will need to change this.
+[tool.setuptools]
+# Packages to include
+packages = ["aprsd_mqtt_plugin"]
+
+# PBR configuration for version management
+# Note: The __init__.py uses pbr.version, so pbr is required in build-system
+[tool.pbr]
+version = ""
+
+[build-system]
+requires = [
+    "setuptools>=69.5.0",
+    "pbr>=6.0.0",
+    "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.isort]
+force_sort_within_sections = true
+multi_line_output = 4
+line_length = 88
+skip_gitignore = true
+
+[tool.coverage.run]
+branch = true
+
+[tool.mypy]
+ignore_missing_imports = true
+strict = true
