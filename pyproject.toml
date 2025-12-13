@@ -109,7 +109,9 @@ Documentation = "https://aprsd-mqtt-plugin.readthedocs.io/en/latest/"
 # If you are using a different build backend, you will need to change this.
 [tool.setuptools]
 # Packages to include
-packages = ["aprsd_mqtt_plugin"]
+# Packages to include - use find: to auto-discover all packages and subpackages
+packages = {find = {}}
+package-data = {"sample" = ["*.dat"]}
 
 # PBR configuration for version management
 # Note: The __init__.py uses pbr.version, so pbr is required in build-system
