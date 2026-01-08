@@ -73,16 +73,16 @@ class MQTTPlugin(plugin.APRSDPluginBase):
     def on_publish(self, client, userdata, mid):
         LOG.info(f"Published {mid}:{userdata}")
 
-    def on_connect(self, client, userdata, flags, rc):
+    def on_connect(self, client, userdata, connect_flags, reason_code, properties):
         LOG.info(
             f"Connected to mqtt://{CONF.aprsd_mqtt_plugin.host_ip}:"
             f"{CONF.aprsd_mqtt_plugin.host_port}/"
-            f"{CONF.aprsd_mqtt_plugin.topic} ({rc})",
+            f"{CONF.aprsd_mqtt_plugin.topic} (reason_code={reason_code})",
         )
-        client.subscribe(CONF.mqtt.topic)
+        client.subscribe(CONF.aprsd_mqtt_plugin.topic)
 
-    def on_disconnect(self, client, userdata, rc):
-        LOG.warning("client disconnected ok")
+    def on_disconnect(self, client, userdata, disconnect_flags, reason_code, properties):
+        LOG.warning(f"MQTT client disconnected (reason_code={reason_code})")
 
     def stop(self):
         """Stop the MQTT client loop and disconnect cleanly."""
