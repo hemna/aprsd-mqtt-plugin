@@ -66,6 +66,9 @@ class MQTTPlugin(plugin.APRSDPluginBase):
             keepalive=60,
             # properties=properties
         )
+        # Start the client's event loop thread to handle network I/O
+        # This prevents blocking calls and ensures proper MQTT protocol handling
+        self.client.loop_start()
 
     def on_publish(self, client, userdata, mid):
         LOG.info(f"Published {mid}:{userdata}")
@@ -80,6 +83,16 @@ class MQTTPlugin(plugin.APRSDPluginBase):
 
     def on_disconnect(self, client, userdata, rc):
         LOG.warning("client disconnected ok")
+
+    def stop(self):
+        """Stop the MQTT client loop and disconnect cleanly."""
+        if self.client:
+            try:
+                self.client.loop_stop()
+                self.client.disconnect()
+                LOG.info("MQTT client stopped and disconnected")
+            except Exception as e:
+                LOG.error(f"Error stopping MQTT client: {e}")
 
     @hookimpl
     def filter(self, packet: packets.core.Packet):
@@ -109,6 +122,7 @@ class MQTTPlugin(plugin.APRSDPluginBase):
                 f"{CONF.aprsd_mqtt_plugin.host_ip}:{CONF.aprsd_mqtt_plugin.host_port}"
                 f"/{CONF.aprsd_mqtt_plugin.topic}",
             )
+            # LOG.debug(f"Packet: {packet.to_json()}")
         self.client.publish(
             CONF.aprsd_mqtt_plugin.topic,
             payload=packet.to_json(),
