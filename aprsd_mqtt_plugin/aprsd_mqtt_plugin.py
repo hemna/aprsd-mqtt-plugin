@@ -1,4 +1,5 @@
 import logging
+import json
 
 import paho.mqtt.client as mqtt
 import pluggy
@@ -37,14 +38,17 @@ class MQTTPlugin(plugin.APRSDPluginBase):
             LOG.error("aprsd_mqtt_plugin MQTT host_ip not set. Disabling plugin")
             self.enabled = False
             return
-
+        
+        # make sure the client id is unique per aprsd instance
+        client_id = "aprsd_mqtt_plugin" + CONF.callsign
+        LOG.info(f"Using MQTT client id: {client_id}") 
+        
         self.client = mqtt.Client(
             callback_api_version=mqtt.CallbackAPIVersion.VERSION2,
-            client_id="aprsd_mqtt_plugin",
+            client_id=client_id,
             # transport='websockets',
             # protocol=mqtt.MQTTv5
         )
-        # self.client.on_publish = self.on_publish
         self.client.on_connect = self.on_connect
         self.client.on_disconnect = self.on_disconnect
 
@@ -69,9 +73,6 @@ class MQTTPlugin(plugin.APRSDPluginBase):
         # Start the client's event loop thread to handle network I/O
         # This prevents blocking calls and ensures proper MQTT protocol handling
         self.client.loop_start()
-
-    def on_publish(self, client, userdata, mid):
-        LOG.info(f"Published {mid}:{userdata}")
 
     def on_connect(self, client, userdata, connect_flags, reason_code, properties):
         LOG.info(
@@ -110,8 +111,6 @@ class MQTTPlugin(plugin.APRSDPluginBase):
                 )
             if result:
                 self.tx_inc()
-        else:
-            LOG.warning(f"{self.__class__} plugin is not enabled")
 
         return result
 
@@ -122,10 +121,10 @@ class MQTTPlugin(plugin.APRSDPluginBase):
                 f"{CONF.aprsd_mqtt_plugin.host_ip}:{CONF.aprsd_mqtt_plugin.host_port}"
                 f"/{CONF.aprsd_mqtt_plugin.topic}",
             )
-            # LOG.debug(f"Packet: {packet.to_json()}")
         self.client.publish(
             CONF.aprsd_mqtt_plugin.topic,
-            payload=packet.to_json(),
+            # payload=packet.to_json(),
+            payload=json.dumps(packet.raw_dict),
             qos=0,
             # qos=2,
             # properties=self.mqtt_properties
