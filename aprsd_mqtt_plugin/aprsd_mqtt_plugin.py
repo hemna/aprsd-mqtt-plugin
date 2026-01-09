@@ -38,11 +38,11 @@ class MQTTPlugin(plugin.APRSDPluginBase):
             LOG.error("aprsd_mqtt_plugin MQTT host_ip not set. Disabling plugin")
             self.enabled = False
             return
-        
+
         # make sure the client id is unique per aprsd instance
         client_id = "aprsd_mqtt_plugin" + CONF.callsign
-        LOG.info(f"Using MQTT client id: {client_id}") 
-        
+        LOG.info(f"Using MQTT client id: {client_id}")
+
         self.client = mqtt.Client(
             callback_api_version=mqtt.CallbackAPIVersion.VERSION2,
             client_id=client_id,
@@ -57,6 +57,14 @@ class MQTTPlugin(plugin.APRSDPluginBase):
                 CONF.aprsd_mqtt_plugin.user,
                 CONF.aprsd_mqtt_plugin.password,
             )
+
+        # Set max queued messages to prevent unbounded queue growth
+        # This prevents memory buildup and blocking when broker is slow
+        # Default is 0 (unlimited), setting to 1000 allows some buffering
+        # but prevents unbounded growth
+        max_queue = getattr(CONF.aprsd_mqtt_plugin, 'max_queued_messages', 1000)
+        self.client.max_queued_messages_set(max_queue)
+        LOG.info(f"MQTT max_queued_messages set to {max_queue}")
 
         self.mqtt_properties = Properties(PacketTypes.PUBLISH)
         self.mqtt_properties.MessageExpiryInterval = 30  # in seconds
@@ -73,6 +81,10 @@ class MQTTPlugin(plugin.APRSDPluginBase):
         # Start the client's event loop thread to handle network I/O
         # This prevents blocking calls and ensures proper MQTT protocol handling
         self.client.loop_start()
+
+        # Track publish failures for monitoring
+        self.publish_failures = 0
+        self.queue_full_count = 0
 
     def on_connect(self, client, userdata, connect_flags, reason_code, properties):
         LOG.info(
@@ -121,14 +133,48 @@ class MQTTPlugin(plugin.APRSDPluginBase):
                 f"{CONF.aprsd_mqtt_plugin.host_ip}:{CONF.aprsd_mqtt_plugin.host_port}"
                 f"/{CONF.aprsd_mqtt_plugin.topic}",
             )
-        self.client.publish(
-            CONF.aprsd_mqtt_plugin.topic,
-            # payload=packet.to_json(),
-            payload=json.dumps(packet.raw_dict),
-            qos=0,
-            # qos=2,
-            # properties=self.mqtt_properties
-        )
+            if self.queue_full_count > 0:
+                LOG.warning(
+                    f"MQTT publish queue full count: {self.queue_full_count}, "
+                    f"publish failures: {self.publish_failures}"
+                )
+
+        # Use a non-blocking publish to avoid potential blocking
+        # Check return code to detect queue full scenarios
+        try:
+            # paho-mqtt's publish() returns immediately with loop_start()
+            # but we need to check the return code for queue full errors
+            result = self.client.publish(
+                CONF.aprsd_mqtt_plugin.topic,
+                payload=json.dumps(packet.raw_dict),
+                qos=0,
+            )
+
+            # Check if publish was successful
+            # result.rc will be mqtt.MQTT_ERR_QUEUE_SIZE if queue is full
+            # result.rc will be mqtt.MQTT_ERR_SUCCESS (0) if queued successfully
+            if result.rc == mqtt.MQTT_ERR_QUEUE_SIZE:
+                self.queue_full_count += 1
+                # Log warning every 100 queue full events to avoid log spam
+                if self.queue_full_count % 100 == 1:
+                    LOG.warning(
+                        f"MQTT publish queue is full! Dropping packets. "
+                        f"Total queue full events: {self.queue_full_count}. "
+                        f"This indicates the MQTT broker is slow or network issues."
+                    )
+            elif result.rc != mqtt.MQTT_ERR_SUCCESS:
+                self.publish_failures += 1
+                # Log error every 100 failures to avoid log spam
+                if self.publish_failures % 100 == 1:
+                    LOG.error(
+                        f"MQTT publish failed with error code {result.rc}. "
+                        f"Total failures: {self.publish_failures}"
+                    )
+        except Exception as e:
+            self.publish_failures += 1
+            # Only log exceptions occasionally to avoid log spam
+            if self.publish_failures % 100 == 1:
+                LOG.error(f"MQTT publish exception: {e} (total failures: {self.publish_failures})")
 
         # Now we can process
         return packets.NULL_MESSAGE
