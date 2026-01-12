@@ -85,6 +85,8 @@ class MQTTPlugin(plugin.APRSDPluginBase):
         # Track publish failures for monitoring
         self.publish_failures = 0
         self.queue_full_count = 0
+        # Track recent queue full events to detect persistent queue issues
+        self.recent_queue_full = 0
 
     def on_connect(self, client, userdata, connect_flags, reason_code, properties):
         LOG.info(
@@ -127,7 +129,7 @@ class MQTTPlugin(plugin.APRSDPluginBase):
         return result
 
     def process(self, packet: packets.core.Packet):
-        if self.tx_count % 50 == 0:
+        if self.tx_count % 200 == 0:
             LOG.debug(
                 f"MQTTPlugin Publishing packet ({self.tx_count}) to mqtt://"
                 f"{CONF.aprsd_mqtt_plugin.host_ip}:{CONF.aprsd_mqtt_plugin.host_port}"
@@ -138,6 +140,23 @@ class MQTTPlugin(plugin.APRSDPluginBase):
                     f"MQTT publish queue full count: {self.queue_full_count}, "
                     f"publish failures: {self.publish_failures}"
                 )
+
+        # Check if client is connected before attempting to publish
+        # This prevents unnecessary JSON serialization when disconnected
+        if not self.client.is_connected():
+            # Client is disconnected, skip publishing to avoid blocking
+            # The on_connect callback will handle reconnection
+            LOG.warning("MQTT client is disconnected, skipping packet.")
+            return packets.NULL_MESSAGE
+
+        # If queue has been consistently full recently, skip JSON serialization
+        # to avoid wasting CPU cycles when we know publish will fail
+        # Reset counter after successful publishes
+        if self.recent_queue_full > 500:
+            # Queue has been consistently full, skip this packet entirely
+            # This prevents slowdown from repeated failed publish attempts
+            LOG.warning(f"MQTT publish queue has been consistently full for {self.recent_queue_full} packets. Skipping packet.")
+            return packets.NULL_MESSAGE
 
         # Use a non-blocking publish to avoid potential blocking
         # Check return code to detect queue full scenarios
@@ -155,6 +174,7 @@ class MQTTPlugin(plugin.APRSDPluginBase):
             # result.rc will be mqtt.MQTT_ERR_SUCCESS (0) if queued successfully
             if result.rc == mqtt.MQTT_ERR_QUEUE_SIZE:
                 self.queue_full_count += 1
+                self.recent_queue_full += 1
                 # Log warning every 100 queue full events to avoid log spam
                 if self.queue_full_count % 100 == 1:
                     LOG.warning(
@@ -162,6 +182,13 @@ class MQTTPlugin(plugin.APRSDPluginBase):
                         f"Total queue full events: {self.queue_full_count}. "
                         f"This indicates the MQTT broker is slow or network issues."
                     )
+                # Skip further processing when queue is full to prevent blocking
+                return packets.NULL_MESSAGE
+            elif result.rc == mqtt.MQTT_ERR_SUCCESS:
+                # Successful publish, reset recent queue full counter
+                # This allows us to resume publishing when queue clears
+                if self.recent_queue_full > 0:
+                    self.recent_queue_full = max(0, self.recent_queue_full - 1)
             elif result.rc != mqtt.MQTT_ERR_SUCCESS:
                 self.publish_failures += 1
                 # Log error every 100 failures to avoid log spam
