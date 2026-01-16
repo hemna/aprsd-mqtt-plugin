@@ -17,7 +17,6 @@ hookimpl = pluggy.HookimplMarker("aprsd")
 
 
 class MQTTPlugin(plugin.APRSDPluginBase):
-
     enabled = False
     client = None
 
@@ -62,7 +61,7 @@ class MQTTPlugin(plugin.APRSDPluginBase):
         # This prevents memory buildup and blocking when broker is slow
         # Default is 0 (unlimited), setting to 1000 allows some buffering
         # but prevents unbounded growth
-        max_queue = getattr(CONF.aprsd_mqtt_plugin, 'max_queued_messages', 1000)
+        max_queue = getattr(CONF.aprsd_mqtt_plugin, "max_queued_messages", 1000)
         self.client.max_queued_messages_set(max_queue)
         LOG.info(f"MQTT max_queued_messages set to {max_queue}")
 
@@ -70,7 +69,9 @@ class MQTTPlugin(plugin.APRSDPluginBase):
         self.mqtt_properties.MessageExpiryInterval = 30  # in seconds
         properties = Properties(PacketTypes.CONNECT)
         properties.SessionExpiryInterval = 30 * 60  # in seconds
-        LOG.info(f"Connecting to mqtt://{CONF.aprsd_mqtt_plugin.host_ip}:{CONF.aprsd_mqtt_plugin.host_port}")
+        LOG.info(
+            f"Connecting to mqtt://{CONF.aprsd_mqtt_plugin.host_ip}:{CONF.aprsd_mqtt_plugin.host_port}"
+        )
         self.client.connect(
             CONF.aprsd_mqtt_plugin.host_ip,
             port=CONF.aprsd_mqtt_plugin.host_port,
@@ -96,7 +97,9 @@ class MQTTPlugin(plugin.APRSDPluginBase):
         )
         client.subscribe(CONF.aprsd_mqtt_plugin.topic)
 
-    def on_disconnect(self, client, userdata, disconnect_flags, reason_code, properties):
+    def on_disconnect(
+        self, client, userdata, disconnect_flags, reason_code, properties
+    ):
         LOG.warning(f"MQTT client disconnected (reason_code={reason_code})")
 
     def stop(self):
@@ -120,7 +123,8 @@ class MQTTPlugin(plugin.APRSDPluginBase):
             except Exception as ex:
                 LOG.error(
                     "Plugin {} failed to process packet {}".format(
-                        self.__class__, ex,
+                        self.__class__,
+                        ex,
                     ),
                 )
             if result:
@@ -155,7 +159,9 @@ class MQTTPlugin(plugin.APRSDPluginBase):
         if self.recent_queue_full > 500:
             # Queue has been consistently full, skip this packet entirely
             # This prevents slowdown from repeated failed publish attempts
-            LOG.warning(f"MQTT publish queue has been consistently full for {self.recent_queue_full} packets. Skipping packet.")
+            LOG.warning(
+                f"MQTT publish queue has been consistently full for {self.recent_queue_full} packets. Skipping packet."
+            )
             return packets.NULL_MESSAGE
 
         # Use a non-blocking publish to avoid potential blocking
@@ -201,7 +207,9 @@ class MQTTPlugin(plugin.APRSDPluginBase):
             self.publish_failures += 1
             # Only log exceptions occasionally to avoid log spam
             if self.publish_failures % 100 == 1:
-                LOG.error(f"MQTT publish exception: {e} (total failures: {self.publish_failures})")
+                LOG.error(
+                    f"MQTT publish exception: {e} (total failures: {self.publish_failures})"
+                )
 
         # Now we can process
         return packets.NULL_MESSAGE
