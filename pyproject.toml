@@ -20,7 +20,6 @@ dynamic = ["version"]
 
 # Dependencies from requirements.txt
 dependencies = [
-    "aprsd>=4.2.0",
     "aprslib @ git+https://github.com/hemna/aprs-python.git@09cd7a2829a2e9d28ee1566881c843cc4769e590",
     "oslo_config",
     "paho-mqtt>=2.0.0",
