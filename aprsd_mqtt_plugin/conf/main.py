@@ -3,7 +3,7 @@ from oslo_config import cfg
 
 plugin_group = cfg.OptGroup(
     name="aprsd_mqtt_plugin",
-    title="APRSD Slack Plugin settings",
+    title="APRSD MQTT Plugin settings",
 )
 
 plugin_opts = [

@@ -19,13 +19,24 @@
 > [!NOTE]
 > Star this repo to follow our progress! This code is under active development, and contributions are both welcomed and appreciated. See [CONTRIBUTING.md](https://github.com/hemna/aprsd-mqtt-plugin/blob/master/CONTRIBUTING.md) for details.
 
+## Plugins Included
+
+This package provides two APRSD plugins for publishing APRS packets to MQTT:
+
+| Plugin | Description | Output Format | Use Case |
+|--------|-------------|---------------|----------|
+| **MQTTPlugin** | Publishes decoded APRS packets | JSON | Easy integration with home automation, dashboards, databases |
+| **MQTTRawPlugin** | Publishes raw APRS-IS strings | Plain text | Maximum throughput, custom parsing, low latency |
+
+Both plugins share the same MQTT connection configuration. Choose the one that best fits your use case - they are **mutually exclusive** (use one or the other, not both).
+
 ## Features
 
-The APRSD MQTT Plugin publishes APRS packets to an MQTT broker, allowing you to integrate APRSD with MQTT-based systems. Key features include:
-
+-   **Two Operating Modes**: Choose between decoded JSON or raw APRS-IS string publishing
 -   **MQTT Publishing**: Automatically publishes all received APRS packets to a configured MQTT topic
--   **JSON Format**: Packets are published as JSON for easy consumption by other systems
+-   **JSON Format**: Decoded plugin publishes packets as JSON for easy consumption by other systems
 -   **High Performance**: Uses `orjson` for fast JSON serialization (3-10x faster than standard library)
+-   **Raw Mode**: Maximum throughput with zero parsing overhead - subscriber handles all decoding
 -   **Configurable Broker**: Connect to any MQTT broker (local or remote)
 -   **Authentication Support**: Optional username/password authentication for MQTT broker
 -   **Real-time Integration**: Enables real-time APRS data streaming to MQTT subscribers
@@ -61,9 +72,19 @@ $ aprsd sample-config
 
 This will create a configuration file at `~/.config/aprsd/aprsd.conf` (or `aprsd.yml`).
 
-### MQTT Plugin Configuration
+### Configuration Options
 
-Add the following section to your APRSD configuration file to configure the MQTT plugin:
+| Option | Default | Description |
+|--------|---------|-------------|
+| `enabled` | `False` | Enable the MQTT plugin |
+| `host_ip` | (required) | MQTT broker hostname or IP address |
+| `host_port` | `1883` | MQTT broker port |
+| `user` | (optional) | MQTT username for authentication |
+| `password` | (optional) | MQTT password for authentication |
+| `topic` | `aprsd/packet` | Topic for decoded JSON packets (MQTTPlugin) |
+| `raw_topic` | `aprsd/raw` | Topic for raw APRS-IS strings (MQTTRawPlugin) |
+
+### Complete Configuration Example
 
 ``` yaml
 [aprsd_mqtt_plugin]
@@ -71,90 +92,45 @@ Add the following section to your APRSD configuration file to configure the MQTT
 enabled = True
 
 # MQTT broker hostname or IP address (required)
-host_ip = localhost
+host_ip = mqtt.example.com
 
 # MQTT broker port (default: 1883)
 host_port = 1883
 
-# MQTT topic to publish packets to (default: aprsd/packets)
+# MQTT topic for decoded JSON packets (default: aprsd/packet)
 topic = aprsd/packets
+
+# MQTT topic for raw APRS-IS strings (default: aprsd/raw)
+raw_topic = aprsd/raw
 
 # Optional: MQTT username for authentication
-user =
+user = mqtt_user
 
 # Optional: MQTT password for authentication
-password =
-```
-
-### Example Configuration
-
-Here's a complete example configuration:
-
-``` yaml
-[aprsd_mqtt_plugin]
-enabled = True
-host_ip = mqtt.example.com
-host_port = 1883
-topic = aprsd/packets
-user = mqtt_user
 password = mqtt_password
 ```
 
-### Enable the Plugin
+---
 
-To enable the plugin, add it to the `enabled_plugins` section of your APRSD configuration:
+## MQTTPlugin (Decoded JSON Mode)
 
-``` ini
-[aprsd]
-enabled_plugins = aprsd_mqtt_plugin.aprsd_mqtt_plugin.MQTTPlugin
-```
+The `MQTTPlugin` receives decoded APRS packets from APRSD, serializes them to JSON using `orjson`, and publishes them to the configured `topic`.
 
-### Raw Packet Mode
+### Enable MQTTPlugin
 
-For maximum throughput, use `MQTTRawPlugin` instead of `MQTTPlugin`.
-This publishes raw APRS-IS strings directly to MQTT without decoding or JSON conversion.
-
-Configure the raw topic in your APRSD config:
-
-``` yaml
-[aprsd_mqtt_plugin]
-enabled = True
-host_ip = localhost
-host_port = 1883
-raw_topic = aprsd/raw
-```
-
-Enable the raw plugin instead of the standard plugin:
+Add to your APRSD configuration:
 
 ``` ini
 [aprsd]
-enabled_plugins = aprsd_mqtt_plugin.aprsd_mqtt_plugin.MQTTRawPlugin
+enabled_plugins = aprsd_mqtt_plugin.MQTTPlugin
 ```
-
-Raw packets are published as plain strings, e.g.:
-
-```
-N0CALL>APRS,WIDE1-1:>status text
-```
-
-The MQTT subscriber is responsible for parsing the raw APRS packets.
-This mode is ideal when you want:
-- Maximum packet throughput
-- To handle packet parsing on the subscriber side
-- Minimal latency between receiving and publishing
-
-## Usage
-
-Once installed and configured, the MQTT plugin will automatically start when you run `aprsd server`.
 
 ### How It Works
 
-The plugin:
-
-1.  Connects to the configured MQTT broker on startup
-2.  Subscribes to the configured topic
-3.  Publishes all received APRS packets as JSON to the MQTT topic
-4.  Maintains a persistent connection to the broker
+1. APRSD receives and decodes APRS packets from APRS-IS
+2. MQTTPlugin receives the decoded packet objects via APRSD's plugin hook
+3. Packets are serialized to JSON and published to the `topic`
+4. Maintains a persistent connection to the MQTT broker
 
 ### Packet Format
 
@@ -170,9 +146,61 @@ Packets are published as JSON with the following structure:
 }
 ```
 
-Note: Additional fields may be present in the JSON payload.
+Note: Additional fields may be present depending on packet type (position, weather, telemetry, etc.).
 
-### Verifying It's Working
+### Subscribing to Decoded Packets
+
+``` console
+$ mosquitto_sub -h localhost -t aprsd/packets
+```
+
+---
+
+## MQTTRawPlugin (Raw APRS-IS Mode)
+
+The `MQTTRawPlugin` consumes raw APRS-IS strings directly from APRSD's packet queue and publishes them without any decoding or transformation. This provides maximum throughput for applications that need to handle parsing themselves.
+
+### Enable MQTTRawPlugin
+
+Add to your APRSD configuration:
+
+``` ini
+[aprsd]
+enabled_plugins = aprsd_mqtt_plugin.MQTTRawPlugin
+```
+
+### How It Works
+
+1. APRSD receives raw APRS-IS strings from the network
+2. MQTTRawPlugin pulls raw strings directly from the packet queue (before decoding)
+3. Raw strings are published as-is to the `raw_topic`
+4. Subscriber is responsible for parsing the APRS protocol
+
+### Packet Format
+
+Raw packets are published as plain text strings exactly as received from APRS-IS:
+
+```
+N0CALL>APRS,TCPIP*,qAC,T2TEXAS:>Hello World
+WB4BOR-9>APTT4,WIDE1-1,WIDE2-1,qAR,W4KEL-1:!3400.00N/08400.00W>000/000
+```
+
+### When to Use Raw Mode
+
+- **Maximum throughput** - No CPU cycles spent on decoding
+- **Custom parsing** - You need to parse packets differently than APRSD does
+- **Minimal latency** - Fastest path from APRS-IS to your application
+- **Data archival** - Store original APRS-IS format for later processing
+
+### Subscribing to Raw Packets
+
+``` console
+$ mosquitto_sub -h localhost -t aprsd/raw
+```
+
+---
+
+## Verifying It's Working
 
 After starting APRSD, check the logs for messages like:
 
@@ -181,21 +209,14 @@ INFO: Connecting to mqtt://localhost:1883
 INFO: Connected to mqtt://localhost:1883/aprsd/packets (0)
 ```
 
-You can also subscribe to the MQTT topic using an MQTT client:
-
-``` console
-$ mosquitto_sub -h localhost -t aprsd/packets
+For MQTTRawPlugin:
+```
+INFO: MQTTRawPlugin Publishing packet (200) to mqtt://localhost:1883/aprsd/raw
 ```
 
-Or using `mqtt-cli`:
+## Integration Examples
 
-``` console
-$ mqtt sub -t aprsd/packets
-```
-
-### Integration Examples
-
-**Home Assistant Integration:**
+### Home Assistant (Decoded Mode)
 
 ``` yaml
 mqtt:
@@ -205,13 +226,34 @@ mqtt:
       value_template: "{{ value_json.message_text }}"
 ```
 
-**Node-RED Integration:**
+### Node-RED
 
-Connect an MQTT input node to `aprsd/packets` and parse the JSON payload.
+**Decoded mode**: Connect an MQTT input node to `aprsd/packets` and parse the JSON payload.
 
-**Custom Application:**
+**Raw mode**: Connect an MQTT input node to `aprsd/raw` and use a function node to parse the raw APRS string.
 
-Subscribe to the MQTT topic and process the JSON packets in your application.
+### Custom Application
+
+Subscribe to either topic and process packets in your application:
+
+```python
+import paho.mqtt.client as mqtt
+import json
+
+def on_message(client, userdata, msg):
+    if msg.topic == "aprsd/packets":
+        packet = json.loads(msg.payload)
+        print(f"From: {packet['from']}, Message: {packet.get('message_text', '')}")
+    elif msg.topic == "aprsd/raw":
+        raw = msg.payload.decode()
+        print(f"Raw: {raw}")
+
+client = mqtt.Client()
+client.on_message = on_message
+client.connect("localhost", 1883)
+client.subscribe("aprsd/#")
+client.loop_forever()
+```
 
 For more details, see the [Command-line Reference](https://aprsd-mqtt-plugin.readthedocs.io/en/latest/usage.html).
 
