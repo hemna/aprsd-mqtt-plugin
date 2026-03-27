@@ -12,5 +12,8 @@
 
 import pbr.version
 
+from aprsd_mqtt_plugin.aprsd_mqtt_plugin import MQTTPlugin, MQTTRawPlugin
+
 
 __version__ = pbr.version.VersionInfo("aprsd_mqtt_plugin").version_string()
+__all__ = ["MQTTPlugin", "MQTTRawPlugin", "__version__"]

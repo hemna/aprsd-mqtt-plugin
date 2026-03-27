@@ -5,6 +5,14 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 
+def test_package_exports_both_plugins():
+    """Test that package exports both plugin classes."""
+    from aprsd_mqtt_plugin import MQTTPlugin, MQTTRawPlugin
+
+    assert MQTTPlugin is not None
+    assert MQTTRawPlugin is not None
+
+
 class TestMQTTPlugin:
     """Tests for the refactored MQTTPlugin class."""
 
