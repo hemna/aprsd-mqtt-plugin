@@ -1,8 +1,8 @@
 import abc
+import json
 import logging
 import queue
 
-import orjson
 import paho.mqtt.client as mqtt
 import pluggy
 from aprsd import packets, plugin
@@ -229,7 +229,7 @@ class MQTTPlugin(plugin.APRSDPluginBase, MQTTPluginBase):
 
         self.publish(
             CONF.aprsd_mqtt_plugin.topic,
-            orjson.dumps(packet.raw_dict),
+            json.dumps(packet.raw_dict),
         )
 
         return packets.NULL_MESSAGE

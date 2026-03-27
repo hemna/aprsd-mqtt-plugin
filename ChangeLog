@@ -1,6 +1,15 @@
 CHANGES
 =======
 
+v0.4.0
+------
+
+* Add MQTTRawPlugin for publishing raw APRS-IS strings (maximum throughput)
+* Extract shared MQTT logic into MQTTPluginBase class
+* Switch from orjson to standard library json for freethreaded Python support
+* Add raw_topic configuration option
+* Add comprehensive test suite (14 tests)
+
 v0.3.0
 ------
 

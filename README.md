@@ -35,8 +35,8 @@ Both plugins share the same MQTT connection configuration. Choose the one that b
 -   **Two Operating Modes**: Choose between decoded JSON or raw APRS-IS string publishing
 -   **MQTT Publishing**: Automatically publishes all received APRS packets to a configured MQTT topic
 -   **JSON Format**: Decoded plugin publishes packets as JSON for easy consumption by other systems
--   **High Performance**: Uses `orjson` for fast JSON serialization (3-10x faster than standard library)
 -   **Raw Mode**: Maximum throughput with zero parsing overhead - subscriber handles all decoding
+-   **Freethreaded Python Support**: Compatible with both standard and freethreaded Python builds
 -   **Configurable Broker**: Connect to any MQTT broker (local or remote)
 -   **Authentication Support**: Optional username/password authentication for MQTT broker
 -   **Real-time Integration**: Enables real-time APRS data streaming to MQTT subscribers
@@ -114,7 +114,7 @@ password = mqtt_password
 
 ## MQTTPlugin (Decoded JSON Mode)
 
-The `MQTTPlugin` receives decoded APRS packets from APRSD, serializes them to JSON using `orjson`, and publishes them to the configured `topic`.
+The `MQTTPlugin` receives decoded APRS packets from APRSD, serializes them to JSON, and publishes them to the configured `topic`.
 
 ### Enable MQTTPlugin
 
