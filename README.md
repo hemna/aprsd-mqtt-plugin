@@ -109,6 +109,40 @@ To enable the plugin, add it to the `enabled_plugins` section of your APRSD conf
 enabled_plugins = aprsd_mqtt_plugin.aprsd_mqtt_plugin.MQTTPlugin
 ```
 
+### Raw Packet Mode
+
+For maximum throughput, use `MQTTRawPlugin` instead of `MQTTPlugin`.
+This publishes raw APRS-IS strings directly to MQTT without decoding or JSON conversion.
+
+Configure the raw topic in your APRSD config:
+
+``` yaml
+[aprsd_mqtt_plugin]
+enabled = True
+host_ip = localhost
+host_port = 1883
+raw_topic = aprsd/raw
+```
+
+Enable the raw plugin instead of the standard plugin:
+
+``` ini
+[aprsd]
+enabled_plugins = aprsd_mqtt_plugin.aprsd_mqtt_plugin.MQTTRawPlugin
+```
+
+Raw packets are published as plain strings, e.g.:
+
+```
+N0CALL>APRS,WIDE1-1:>status text
+```
+
+The MQTT subscriber is responsible for parsing the raw APRS packets.
+This mode is ideal when you want:
+- Maximum packet throughput
+- To handle packet parsing on the subscriber side
+- Minimal latency between receiving and publishing
+
 ## Usage
 
 Once installed and configured, the MQTT plugin will automatically start when you run `aprsd server`.
