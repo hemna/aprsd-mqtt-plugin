@@ -1,6 +1,6 @@
 import logging
-import json
 
+import orjson
 import paho.mqtt.client as mqtt
 import pluggy
 from aprsd import packets, plugin
@@ -171,7 +171,7 @@ class MQTTPlugin(plugin.APRSDPluginBase):
             # but we need to check the return code for queue full errors
             result = self.client.publish(
                 CONF.aprsd_mqtt_plugin.topic,
-                payload=json.dumps(packet.raw_dict),
+                payload=orjson.dumps(packet.raw_dict),
                 qos=0,
             )
 

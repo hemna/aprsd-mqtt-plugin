@@ -1,0 +1,18 @@
+CHANGES
+=======
+
+v0.3.0
+------
+
+* Switch from json to orjson for faster JSON serialization (3-10x speedup)
+
+v0.2.0
+------
+
+* fix pep8 errors
+* Got plugin working
+
+v0.1.0
+------
+
+* Initial commit

@@ -25,6 +25,7 @@ The APRSD MQTT Plugin publishes APRS packets to an MQTT broker, allowing you to 
 
 -   **MQTT Publishing**: Automatically publishes all received APRS packets to a configured MQTT topic
 -   **JSON Format**: Packets are published as JSON for easy consumption by other systems
+-   **High Performance**: Uses `orjson` for fast JSON serialization (3-10x faster than standard library)
 -   **Configurable Broker**: Connect to any MQTT broker (local or remote)
 -   **Authentication Support**: Optional username/password authentication for MQTT broker
 -   **Real-time Integration**: Enables real-time APRS data streaming to MQTT subscribers
