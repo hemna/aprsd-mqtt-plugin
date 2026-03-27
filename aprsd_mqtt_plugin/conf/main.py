@@ -37,6 +37,11 @@ plugin_opts = [
         default="aprsd/packet",
         help="The MQTT Topic to subscribe for messages",
     ),
+    cfg.StrOpt(
+        "raw_topic",
+        default="aprsd/raw",
+        help="The MQTT Topic to publish raw APRS-IS packets to",
+    ),
 ]
 
 ALL_OPTS = plugin_opts
