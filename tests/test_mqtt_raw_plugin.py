@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """Tests for MQTTRawPlugin class."""
 
-import pytest
 import queue
 from unittest.mock import MagicMock, patch
 

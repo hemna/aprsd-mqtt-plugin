@@ -1,0 +1,4 @@
+aprsd_mqtt_plugin
+build
+docs
+tests

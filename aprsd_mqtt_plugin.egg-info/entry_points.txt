@@ -1,0 +1,5 @@
+[console_scripts]
+aprsd-mqtt-plugin-export-config = aprsd_mqtt_plugin.cli:main
+
+[oslo.config.opts]
+aprsd_mqtt_plugin.conf = aprsd_mqtt_plugin.conf.opts:list_opts

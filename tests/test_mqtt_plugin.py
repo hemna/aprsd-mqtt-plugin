@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """Tests for MQTTPlugin class."""
 
-import pytest
 from unittest.mock import MagicMock, patch
 
 

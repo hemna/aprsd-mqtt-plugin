@@ -1,17 +1,7 @@
 #!/usr/bin/env python
 """Tests for MQTTPluginBase class."""
 
-import sys
-import pytest
 from unittest.mock import MagicMock, patch
-
-# Mock aprsd modules before importing our plugin
-sys.modules["aprsd"] = MagicMock()
-sys.modules["aprsd.packets"] = MagicMock()
-sys.modules["aprsd.plugin"] = MagicMock()
-sys.modules["aprsd.packets.core"] = MagicMock()
-sys.modules["aprsd.threads"] = MagicMock()
-sys.modules["aprsd.threads.rx"] = MagicMock()
 
 
 class TestMQTTPluginBase:

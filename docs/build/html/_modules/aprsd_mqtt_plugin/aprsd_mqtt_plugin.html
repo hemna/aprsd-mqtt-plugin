@@ -1,0 +1,248 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aprsd_mqtt_plugin.aprsd_mqtt_plugin &mdash; APRSD MQTT Plugin 0.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/firacode/6.2.0/fira_code.min.css" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=7026087e"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            APRSD MQTT Plugin
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">APRSD MQTT Plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">APRSD MQTT Plugin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">aprsd_mqtt_plugin.aprsd_mqtt_plugin</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aprsd_mqtt_plugin.aprsd_mqtt_plugin</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">paho.mqtt.client</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mqtt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pluggy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aprsd</span><span class="w"> </span><span class="kn">import</span> <span class="n">packets</span><span class="p">,</span> <span class="n">plugin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">oslo_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">cfg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">paho.mqtt.packettypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">PacketTypes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">paho.mqtt.properties</span><span class="w"> </span><span class="kn">import</span> <span class="n">Properties</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">aprsd_mqtt_plugin</span><span class="w"> </span><span class="kn">import</span> <span class="n">conf</span>  <span class="c1"># noqa</span>
+
+
+<span class="n">CONF</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">CONF</span>
+<span class="n">LOG</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;APRSD&quot;</span><span class="p">)</span>
+<span class="n">hookimpl</span> <span class="o">=</span> <span class="n">pluggy</span><span class="o">.</span><span class="n">HookimplMarker</span><span class="p">(</span><span class="s2">&quot;aprsd&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="MQTTPlugin">
+<a class="viewcode-back" href="../../apidoc/aprsd_mqtt_plugin.html#aprsd_mqtt_plugin.aprsd_mqtt_plugin.MQTTPlugin">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MQTTPlugin</span><span class="p">(</span><span class="n">plugin</span><span class="o">.</span><span class="n">APRSDPluginBase</span><span class="p">):</span>
+
+    <span class="n">enabled</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="MQTTPlugin.setup">
+<a class="viewcode-back" href="../../apidoc/aprsd_mqtt_plugin.html#aprsd_mqtt_plugin.aprsd_mqtt_plugin.MQTTPlugin.setup">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Allows the plugin to do some &#39;setup&#39; type checks in here.</span>
+
+<span class="sd">        If the setup checks fail, set the self.enabled = False.  This</span>
+<span class="sd">        will prevent the plugin from being called when packets are</span>
+<span class="sd">        received.&quot;&quot;&quot;</span>
+        <span class="c1"># Do some checks here?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">CONF</span><span class="o">.</span><span class="n">aprsd_mqtt_plugin</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Plugin not enabled in config.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">CONF</span><span class="o">.</span><span class="n">aprsd_mqtt_plugin</span><span class="o">.</span><span class="n">host_ip</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;aprsd_mqtt_plugin MQTT host_ip not set. Disabling plugin&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">mqtt</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
+            <span class="n">callback_api_version</span><span class="o">=</span><span class="n">mqtt</span><span class="o">.</span><span class="n">CallbackAPIVersion</span><span class="o">.</span><span class="n">VERSION2</span><span class="p">,</span>
+            <span class="n">client_id</span><span class="o">=</span><span class="s2">&quot;aprsd_mqtt_plugin&quot;</span><span class="p">,</span>
+            <span class="c1"># transport=&#39;websockets&#39;,</span>
+            <span class="c1"># protocol=mqtt.MQTTv5</span>
+        <span class="p">)</span>
+        <span class="c1"># self.client.on_publish = self.on_publish</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">on_connect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_connect</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">on_disconnect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_disconnect</span>
+
+        <span class="k">if</span> <span class="n">CONF</span><span class="o">.</span><span class="n">aprsd_mqtt_plugin</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">username_pw_set</span><span class="p">(</span>
+                <span class="n">CONF</span><span class="o">.</span><span class="n">aprsd_mqtt_plugin</span><span class="o">.</span><span class="n">user</span><span class="p">,</span>
+                <span class="n">CONF</span><span class="o">.</span><span class="n">aprsd_mqtt_plugin</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mqtt_properties</span> <span class="o">=</span> <span class="n">Properties</span><span class="p">(</span><span class="n">PacketTypes</span><span class="o">.</span><span class="n">PUBLISH</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mqtt_properties</span><span class="o">.</span><span class="n">MessageExpiryInterval</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># in seconds</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="n">Properties</span><span class="p">(</span><span class="n">PacketTypes</span><span class="o">.</span><span class="n">CONNECT</span><span class="p">)</span>
+        <span class="n">properties</span><span class="o">.</span><span class="n">SessionExpiryInterval</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># in seconds</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Connecting to mqtt://</span><span class="si">{</span><span class="n">CONF</span><span class="o">.</span><span class="n">aprsd_mqtt_plugin</span><span class="o">.</span><span class="n">host_ip</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">CONF</span><span class="o">.</span><span class="n">aprsd_mqtt_plugin</span><span class="o">.</span><span class="n">host_port</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
+            <span class="n">CONF</span><span class="o">.</span><span class="n">aprsd_mqtt_plugin</span><span class="o">.</span><span class="n">host_ip</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="n">CONF</span><span class="o">.</span><span class="n">aprsd_mqtt_plugin</span><span class="o">.</span><span class="n">host_port</span><span class="p">,</span>
+            <span class="c1"># clean_start=mqtt.MQTT_CLEAN_START_FIRST_ONLY,</span>
+            <span class="n">keepalive</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+            <span class="c1"># properties=properties</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MQTTPlugin.on_publish">
+<a class="viewcode-back" href="../../apidoc/aprsd_mqtt_plugin.html#aprsd_mqtt_plugin.aprsd_mqtt_plugin.MQTTPlugin.on_publish">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_publish</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">mid</span><span class="p">):</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Published </span><span class="si">{</span><span class="n">mid</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">userdata</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MQTTPlugin.on_connect">
+<a class="viewcode-back" href="../../apidoc/aprsd_mqtt_plugin.html#aprsd_mqtt_plugin.aprsd_mqtt_plugin.MQTTPlugin.on_connect">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">rc</span><span class="p">):</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Connected to mqtt://</span><span class="si">{</span><span class="n">CONF</span><span class="o">.</span><span class="n">aprsd_mqtt_plugin</span><span class="o">.</span><span class="n">host_ip</span><span class="si">}</span><span class="s2">:&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONF</span><span class="o">.</span><span class="n">aprsd_mqtt_plugin</span><span class="o">.</span><span class="n">host_port</span><span class="si">}</span><span class="s2">/&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONF</span><span class="o">.</span><span class="n">aprsd_mqtt_plugin</span><span class="o">.</span><span class="n">topic</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">rc</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">CONF</span><span class="o">.</span><span class="n">mqtt</span><span class="o">.</span><span class="n">topic</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MQTTPlugin.on_disconnect">
+<a class="viewcode-back" href="../../apidoc/aprsd_mqtt_plugin.html#aprsd_mqtt_plugin.aprsd_mqtt_plugin.MQTTPlugin.on_disconnect">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">rc</span><span class="p">):</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;client disconnected ok&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MQTTPlugin.filter">
+<a class="viewcode-back" href="../../apidoc/aprsd_mqtt_plugin.html#aprsd_mqtt_plugin.aprsd_mqtt_plugin.MQTTPlugin.filter">[docs]</a>
+    <span class="nd">@hookimpl</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packets</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Packet</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">packets</span><span class="o">.</span><span class="n">NULL_MESSAGE</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="c1"># packet is from a callsign in the watch list</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rx_inc</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+                <span class="n">LOG</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;Plugin </span><span class="si">{}</span><span class="s2"> failed to process packet </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">ex</span><span class="p">,</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tx_inc</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="si">}</span><span class="s2"> plugin is not enabled&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="MQTTPlugin.process">
+<a class="viewcode-back" href="../../apidoc/aprsd_mqtt_plugin.html#aprsd_mqtt_plugin.aprsd_mqtt_plugin.MQTTPlugin.process">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packets</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Packet</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tx_count</span> <span class="o">%</span> <span class="mi">50</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;MQTTPlugin Publishing packet (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tx_count</span><span class="si">}</span><span class="s2">) to mqtt://&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONF</span><span class="o">.</span><span class="n">aprsd_mqtt_plugin</span><span class="o">.</span><span class="n">host_ip</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">CONF</span><span class="o">.</span><span class="n">aprsd_mqtt_plugin</span><span class="o">.</span><span class="n">host_port</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">CONF</span><span class="o">.</span><span class="n">aprsd_mqtt_plugin</span><span class="o">.</span><span class="n">topic</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span>
+            <span class="n">CONF</span><span class="o">.</span><span class="n">aprsd_mqtt_plugin</span><span class="o">.</span><span class="n">topic</span><span class="p">,</span>
+            <span class="n">payload</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span>
+            <span class="n">qos</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="c1"># qos=2,</span>
+            <span class="c1"># properties=self.mqtt_properties</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Now we can process</span>
+        <span class="k">return</span> <span class="n">packets</span><span class="o">.</span><span class="n">NULL_MESSAGE</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

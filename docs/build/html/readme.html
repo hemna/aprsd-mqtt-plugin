@@ -1,0 +1,325 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APRSD MQTT Plugin &mdash; APRSD MQTT Plugin 0.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/firacode/6.2.0/fira_code.min.css" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=7026087e"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" />
+    <link rel="prev" title="Welcome to APRSD MQTT Plugin’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            APRSD MQTT Plugin
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">APRSD MQTT Plugin</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mqtt-plugin-configuration">MQTT Plugin Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-configuration">Example Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#enable-the-plugin">Enable the Plugin</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#how-it-works">How It Works</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#packet-format">Packet Format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#verifying-it-s-working">Verifying It’s Working</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#integration-examples">Integration Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#contributing">Contributing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#license">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#issues">Issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#credits">Credits</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apidoc/modules.html">aprsd_mqtt_plugin</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">APRSD MQTT Plugin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">APRSD MQTT Plugin</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/readme.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="aprsd-mqtt-plugin">
+<h1>APRSD MQTT Plugin<a class="headerlink" href="#aprsd-mqtt-plugin" title="Link to this heading"></a></h1>
+<a class="reference external image-reference" href="https://pypi.org/project/aprsd-mqtt-plugin/"><img alt="PyPI" src="https://img.shields.io/pypi/v/aprsd-mqtt-plugin.svg" />
+</a>
+<a class="reference external image-reference" href="https://pypi.org/project/aprsd-mqtt-plugin/"><img alt="Status" src="https://img.shields.io/pypi/status/aprsd-mqtt-plugin.svg" />
+</a>
+<a class="reference external image-reference" href="https://pypi.org/project/aprsd-mqtt-plugin"><img alt="Python Version" src="https://img.shields.io/pypi/pyversions/aprsd-mqtt-plugin" />
+</a>
+<a class="reference external image-reference" href="https://opensource.org/licenses/Apache%20Software%20License%202.0"><img alt="License" src="https://img.shields.io/pypi/l/aprsd-mqtt-plugin" />
+</a>
+<a class="reference external image-reference" href="https://aprsd-mqtt-plugin.readthedocs.io/"><img alt="Read the Docs" src="https://img.shields.io/readthedocs/aprsd-mqtt-plugin/latest.svg?label=Read%20the%20Docs" />
+</a>
+<a class="reference external image-reference" href="https://github.com/hemna/aprsd-mqtt-plugin/actions?workflow=Tests"><img alt="Tests" src="https://github.com/hemna/aprsd-mqtt-plugin/workflows/Tests/badge.svg" />
+</a>
+<a class="reference external image-reference" href="https://codecov.io/gh/hemna/aprsd-mqtt-plugin"><img alt="Codecov" src="https://codecov.io/gh/hemna/aprsd-mqtt-plugin/branch/main/graph/badge.svg" />
+</a>
+<a class="reference external image-reference" href="https://github.com/pre-commit/pre-commit"><img alt="pre-commit" src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&amp;logoColor=white" />
+</a>
+<hr class="docutils" />
+<blockquote>
+<div><p>[!WARNING]
+Legal operation of this software requires an amateur radio license and a valid call sign.</p>
+<p>[!NOTE]
+Star this repo to follow our progress! This code is under active development, and contributions are both welcomed and appreciated. See <a class="reference external" href="https://github.com/hemna/aprsd-mqtt-plugin/blob/master/CONTRIBUTING.md">CONTRIBUTING.md</a> for details.</p>
+</div></blockquote>
+<section id="features">
+<h2>Features<a class="headerlink" href="#features" title="Link to this heading"></a></h2>
+<p>The APRSD MQTT Plugin publishes APRS packets to an MQTT broker, allowing you to integrate APRSD with MQTT-based systems. Key features include:</p>
+<ul class="simple">
+<li><p><strong>MQTT Publishing</strong>: Automatically publishes all received APRS packets to a configured MQTT topic</p></li>
+<li><p><strong>JSON Format</strong>: Packets are published as JSON for easy consumption by other systems</p></li>
+<li><p><strong>Configurable Broker</strong>: Connect to any MQTT broker (local or remote)</p></li>
+<li><p><strong>Authentication Support</strong>: Optional username/password authentication for MQTT broker</p></li>
+<li><p><strong>Real-time Integration</strong>: Enables real-time APRS data streaming to MQTT subscribers</p></li>
+</ul>
+</section>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">aprsd</span> <span class="pre">&gt;=</span> <span class="pre">3.0.0</span></code></p></li>
+<li><p>A running APRSD instance</p></li>
+<li><p>Access to an MQTT broker (Mosquitto, HiveMQ, EMQX, etc.)</p></li>
+</ul>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
+<p>You can install <em>APRSD MQTT Plugin</em> via <a class="reference external" href="https://pip.pypa.io/">pip</a> from <a class="reference external" href="https://pypi.org/">PyPI</a>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>aprsd-mqtt-plugin
+</pre></div>
+</div>
+<p>Or using <code class="docutils literal notranslate"><span class="pre">uv</span></code>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>aprsd-mqtt-plugin
+</pre></div>
+</div>
+</section>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h2>
+<p>Before using the MQTT plugin, you need to configure it in your APRSD configuration file.
+Generate a sample configuration file if you haven’t already:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>aprsd<span class="w"> </span>sample-config
+</pre></div>
+</div>
+<p>This will create a configuration file at <code class="docutils literal notranslate"><span class="pre">~/.config/aprsd/aprsd.conf</span></code> (or <code class="docutils literal notranslate"><span class="pre">aprsd.yml</span></code>).</p>
+<section id="mqtt-plugin-configuration">
+<h3>MQTT Plugin Configuration<a class="headerlink" href="#mqtt-plugin-configuration" title="Link to this heading"></a></h3>
+<p>Add the following section to your APRSD configuration file to configure the MQTT plugin:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">[</span><span class="nv">aprsd_mqtt_plugin</span><span class="p p-Indicator">]</span>
+<span class="c1"># Enable the MQTT plugin (default: False)</span>
+<span class="l l-Scalar l-Scalar-Plain">enabled = True</span>
+
+<span class="l l-Scalar l-Scalar-Plain"># MQTT broker hostname or IP address (required)</span>
+<span class="l l-Scalar l-Scalar-Plain">host_ip = localhost</span>
+
+<span class="l l-Scalar l-Scalar-Plain"># MQTT broker port (default</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1883)</span>
+<span class="l l-Scalar l-Scalar-Plain">host_port = 1883</span>
+
+<span class="c1"># MQTT topic to publish packets to (default: aprsd/packets)</span>
+<span class="l l-Scalar l-Scalar-Plain">topic = aprsd/packets</span>
+
+<span class="c1"># Optional: MQTT username for authentication</span>
+<span class="l l-Scalar l-Scalar-Plain">user =</span>
+
+<span class="c1"># Optional: MQTT password for authentication</span>
+<span class="l l-Scalar l-Scalar-Plain">password =</span>
+</pre></div>
+</div>
+</section>
+<section id="example-configuration">
+<h3>Example Configuration<a class="headerlink" href="#example-configuration" title="Link to this heading"></a></h3>
+<p>Here’s a complete example configuration:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">[</span><span class="nv">aprsd_mqtt_plugin</span><span class="p p-Indicator">]</span>
+<span class="l l-Scalar l-Scalar-Plain">enabled = True</span>
+<span class="l l-Scalar l-Scalar-Plain">host_ip = mqtt.example.com</span>
+<span class="l l-Scalar l-Scalar-Plain">host_port = 1883</span>
+<span class="l l-Scalar l-Scalar-Plain">topic = aprsd/packets</span>
+<span class="l l-Scalar l-Scalar-Plain">user = mqtt_user</span>
+<span class="l l-Scalar l-Scalar-Plain">password = mqtt_password</span>
+</pre></div>
+</div>
+</section>
+<section id="enable-the-plugin">
+<h3>Enable the Plugin<a class="headerlink" href="#enable-the-plugin" title="Link to this heading"></a></h3>
+<p>To enable the plugin, add it to the <code class="docutils literal notranslate"><span class="pre">enabled_plugins</span></code> section of your APRSD configuration:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[aprsd]</span>
+<span class="na">enabled_plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">aprsd_mqtt_plugin.aprsd_mqtt_plugin.MQTTPlugin</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h2>
+<p>Once installed and configured, the MQTT plugin will automatically start when you run <code class="docutils literal notranslate"><span class="pre">aprsd</span> <span class="pre">server</span></code>.</p>
+<section id="how-it-works">
+<h3>How It Works<a class="headerlink" href="#how-it-works" title="Link to this heading"></a></h3>
+<p>The plugin:</p>
+<ol class="arabic simple">
+<li><p>Connects to the configured MQTT broker on startup</p></li>
+<li><p>Subscribes to the configured topic</p></li>
+<li><p>Publishes all received APRS packets as JSON to the MQTT topic</p></li>
+<li><p>Maintains a persistent connection to the broker</p></li>
+</ol>
+</section>
+<section id="packet-format">
+<h3>Packet Format<a class="headerlink" href="#packet-format" title="Link to this heading"></a></h3>
+<p>Packets are published as JSON with the following structure:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;from&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CALLSIGN&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;to&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DESTINATION&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;message_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Message content&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;WIDE1-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;WIDE2-2&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-01T12:00:00&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Note: Additional fields may be present in the JSON payload.</p>
+</section>
+<section id="verifying-it-s-working">
+<h3>Verifying It’s Working<a class="headerlink" href="#verifying-it-s-working" title="Link to this heading"></a></h3>
+<p>After starting APRSD, check the logs for messages like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">INFO</span><span class="p">:</span> <span class="n">Connecting</span> <span class="n">to</span> <span class="n">mqtt</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">1883</span>
+<span class="n">INFO</span><span class="p">:</span> <span class="n">Connected</span> <span class="n">to</span> <span class="n">mqtt</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">1883</span><span class="o">/</span><span class="n">aprsd</span><span class="o">/</span><span class="n">packets</span> <span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also subscribe to the MQTT topic using an MQTT client:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mosquitto_sub<span class="w"> </span>-h<span class="w"> </span>localhost<span class="w"> </span>-t<span class="w"> </span>aprsd/packets
+</pre></div>
+</div>
+<p>Or using <code class="docutils literal notranslate"><span class="pre">mqtt-cli</span></code>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mqtt<span class="w"> </span>sub<span class="w"> </span>-t<span class="w"> </span>aprsd/packets
+</pre></div>
+</div>
+</section>
+<section id="integration-examples">
+<h3>Integration Examples<a class="headerlink" href="#integration-examples" title="Link to this heading"></a></h3>
+<p><strong>Home Assistant Integration:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">mqtt</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sensor</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;APRS</span><span class="nv"> </span><span class="s">Packet&quot;</span>
+<span class="w">      </span><span class="nt">state_topic</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;aprsd/packets&quot;</span>
+<span class="w">      </span><span class="nt">value_template</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">value_json.message_text</span><span class="nv"> </span><span class="s">}}&quot;</span>
+</pre></div>
+</div>
+<p><strong>Node-RED Integration:</strong></p>
+<p>Connect an MQTT input node to <code class="docutils literal notranslate"><span class="pre">aprsd/packets</span></code> and parse the JSON payload.</p>
+<p><strong>Custom Application:</strong></p>
+<p>Subscribe to the MQTT topic and process the JSON packets in your application.</p>
+<p>For more details, see the <a class="reference external" href="https://aprsd-mqtt-plugin.readthedocs.io/en/latest/usage.html">Command-line Reference</a>.</p>
+</section>
+</section>
+<section id="contributing">
+<h2>Contributing<a class="headerlink" href="#contributing" title="Link to this heading"></a></h2>
+<p>Contributions are very welcome. To learn more, see the <a class="reference external" href="CONTRIBUTING.rst">Contributor Guide</a>.</p>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Link to this heading"></a></h2>
+<p>Distributed under the terms of the <a class="reference external" href="https://opensource.org/licenses/Apache%20Software%20License%202.0">Apache Software License 2.0 license</a>,
+<em>APRSD MQTT Plugin</em> is free and open source software.</p>
+</section>
+<section id="issues">
+<h2>Issues<a class="headerlink" href="#issues" title="Link to this heading"></a></h2>
+<p>If you encounter any problems,
+please <a class="reference external" href="https://github.com/hemna/aprsd-mqtt-plugin/issues">file an issue</a> along with a detailed description.</p>
+</section>
+<section id="credits">
+<h2>Credits<a class="headerlink" href="#credits" title="Link to this heading"></a></h2>
+<p>This project was generated from <a class="reference external" href="https://github.com/hemna">&#64;hemna</a>‘s <a class="reference external" href="https://github.com/hemna/cookiecutter-aprsd-plugin">APRSD Plugin Python Cookiecutter</a> template.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to APRSD MQTT Plugin’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
