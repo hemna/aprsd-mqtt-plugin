@@ -1,10 +1,12 @@
 import abc
 import logging
+import queue
 
 import orjson
 import paho.mqtt.client as mqtt
 import pluggy
 from aprsd import packets, plugin
+from aprsd.threads.rx import APRSDFilterThread
 from oslo_config import cfg
 from paho.mqtt.packettypes import PacketTypes
 from paho.mqtt.properties import Properties
@@ -231,3 +233,70 @@ class MQTTPlugin(plugin.APRSDPluginBase, MQTTPluginBase):
         )
 
         return packets.NULL_MESSAGE
+
+
+class MQTTRawPlugin(APRSDFilterThread, MQTTPluginBase):
+    """APRSD plugin that publishes raw APRS-IS strings to MQTT.
+
+    Consumes raw packets directly from the packet queue before decoding.
+    Maximum throughput - subscriber handles all parsing.
+
+    Inherits:
+        APRSDFilterThread: APRSD threading pattern
+        MQTTPluginBase: MQTT connection logic
+    """
+
+    def __init__(self, packet_queue: queue.Queue):
+        """Initialize the raw packet plugin.
+
+        Args:
+            packet_queue: Queue to consume raw packets from
+        """
+        APRSDFilterThread.__init__(self, "MQTTRawPlugin", packet_queue)
+        self.packet_queue = packet_queue
+        self.packet_count = 0
+        self.enabled = self.setup_mqtt_client()
+
+        if not CONF.aprsd_mqtt_plugin.raw_topic:
+            LOG.error("aprsd_mqtt_plugin raw_topic not set. Disabling plugin.")
+            self.enabled = False
+
+    def loop(self) -> bool:
+        """Pull raw packet from queue and publish to MQTT.
+
+        Returns:
+            True to keep thread running, False to stop.
+        """
+        if not self.enabled:
+            return True
+
+        try:
+            raw_packet = self.packet_queue.get(timeout=1)
+            self.packet_count += 1
+
+            if self.packet_count % 200 == 0:
+                LOG.debug(
+                    f"MQTTRawPlugin Publishing packet ({self.packet_count}) to mqtt://"
+                    f"{CONF.aprsd_mqtt_plugin.host_ip}:{CONF.aprsd_mqtt_plugin.host_port}"
+                    f"/{CONF.aprsd_mqtt_plugin.raw_topic}",
+                )
+                if self.queue_full_count > 0:
+                    LOG.warning(
+                        f"MQTT publish queue full count: {self.queue_full_count}, "
+                        f"publish failures: {self.publish_failures}"
+                    )
+
+            # Publish raw string directly - no decoding, no JSON
+            self.publish(
+                CONF.aprsd_mqtt_plugin.raw_topic,
+                raw_packet,
+            )
+        except queue.Empty:
+            pass
+
+        return True
+
+    def stop(self):
+        """Stop the plugin thread and MQTT connection."""
+        self.stop_mqtt_client()
+        super().stop()
